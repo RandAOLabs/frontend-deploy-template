@@ -1,6 +1,8 @@
-# Deployment Guide
+# Permaweb Deployment Guide (Arweave/ArNS)
 
 This template is configured for automatic deployment to Arweave using permaweb-deploy and GitHub Actions.
+
+> **Note:** This guide covers deployment to the permaweb. For traditional server deployment via SSH/SCP, see the [SSH Deployment Guide](ssh-deployment.md).
 
 ## Prerequisites
 
@@ -41,7 +43,7 @@ Before you can deploy, you'll need:
 ## Deployment
 
 Once configured, deployment is automatic:
-- Every push to the `main` branch triggers a deployment
+- Every push to the `master` branch triggers a deployment
 - The app is built with environment variables injected
 - The build is deployed to Arweave
 - Your ArNS name is updated to point to the new deployment
@@ -49,3 +51,7 @@ Once configured, deployment is automatic:
 For manual deployments or troubleshooting, refer to:
 - [AR.IO Deployment Guide](https://docs.ar.io/guides/perma-deploy/index.html)
 - [permaweb-deploy Repository](https://github.com/permaweb/permaweb-deploy)
+
+## Other Deployment Options
+
+Looking for traditional server hosting? Check out the [SSH Deployment Guide](ssh-deployment.md) for deploying to physical servers or VPS via SSH/SCP.

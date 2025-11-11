@@ -16,15 +16,47 @@ A modern web application template built with:
 - [Vite](https://vitejs.dev/) - Next Generation Frontend Tooling
 - [ArNS](https://ar.io/arns/) - The Permaweb Name System for permanent web deployment
 
-This template provides a minimal setup to get started with React development and automated deployment to the permaweb through ArNS.
+This template provides a minimal setup to get started with React development and automated deployment to both the permaweb (via ArNS) and traditional hosting servers.
 
 ## Getting Started
 
 For development setup instructions, please see our [Development Guide](docs/development.md).
 
-## Deployment
+## Deployment Options
 
-For deployment instructions, please see our [Deployment Guide](docs/deployment.md).
+This template supports two deployment methods, both automated via GitHub Actions:
+
+### 1. Permaweb Deployment (Arweave/ArNS)
+Deploy your application to the permanent web using Arweave's decentralized storage and ArNS for permanent, censorship-resistant hosting.
+
+**Requirements:**
+- Arweave wallet with Turbo Credits
+- ArNS name ownership or controller access
+- GitHub secrets: `DEPLOY_KEY`
+- GitHub variables: `DEPLOY_ARNS_NAME`, `DEPLOY_UNDERNAME` (optional)
+
+📖 [Full Permaweb Deployment Guide](docs/deployment.md)
+
+### 2. Traditional Server Deployment (SSH/SCP)
+Deploy your application to a physical server or VPS via SSH/SCP with automatic nginx reload.
+
+**Requirements:**
+- Server with SSH access
+- Nginx web server
+- Deploy user with proper permissions
+- GitHub secrets: `SSH_PRIVATE_KEY`, `SERVER_IP`
+- DNS configuration (manual, one-time)
+- SSL/TLS certificate setup (manual, one-time with auto-renewal)
+
+📖 [Full SSH Deployment Guide](docs/ssh-deployment.md)
+
+### Deployment Triggers
+
+Both deployments are triggered automatically on every push to the `master` branch. You can disable either workflow by deleting or disabling the respective workflow file in `.github/workflows/`.
+
+### Quick Reference
+
+Need a quick summary of all secrets, variables, and setup steps? Check out the [Deployment Quick Reference](docs/deployment-quick-reference.md).
 
 ## License
 

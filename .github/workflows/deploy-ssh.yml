@@ -1,0 +1,71 @@
+name: SSH Deploy to Physical Server
+
+# Trigger deployment only when pushing to the master branch
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  ssh-build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      VITE_GA4_MEASUREMENT_ID: ${{ vars.GA4_MEASUREMENT_ID }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      # Verify that required secret and variables are present
+      # SSH_PRIVATE_KEY: Your SSH private key (required secret)
+      # SERVER_IP: Your server IP address (required secret)
+      - name: Check required configurations
+        run: |
+          if [ -z "$SSH_PRIVATE_KEY" ]; then
+            echo "Error: SSH_PRIVATE_KEY secret is required but not set"
+            exit 1
+          fi
+          if [ -z "$SERVER_IP" ]; then
+            echo "Error: SERVER_IP secret is required but not set"
+            exit 1
+          fi
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+
+      # Install project dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Build the project
+      - name: Build project
+        run: npm run build
+
+      # Set up SSH key
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+
+      # Copy files to remote server
+      - name: Copy files via SCP
+        run: |
+          scp -i ~/.ssh/deploy_key -r ./dist/* deploy@$SERVER_IP:/var/www/myapp/html/
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+
+      # Reload nginx to serve new files
+      - name: Reload nginx
+        run: |
+          ssh -i ~/.ssh/deploy_key deploy@$SERVER_IP "sudo systemctl reload nginx"
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
