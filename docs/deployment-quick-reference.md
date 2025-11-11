@@ -2,6 +2,12 @@
 
 This document provides a quick reference for all secrets, variables, and configuration needed for both deployment methods.
 
+## SSH Deployment Setup Guides
+
+For first-time setup, follow these focused guides:
+1. **[Server Setup](server-setup.md)** - Deploy user and SSH key configuration
+2. **[Nginx & SSL Setup](nginx-setup.md)** - Nginx and SSL certificate setup
+
 ## GitHub Secrets and Variables
 
 ### Permaweb Deployment (Arweave/ArNS)
@@ -39,9 +45,9 @@ This document provides a quick reference for all secrets, variables, and configu
 - `SERVER_IP` - Your server's IP address
   - Example: `192.168.1.100` or `203.0.113.10`
 
-**Hardcoded Values**:
+**Automatic Values**:
 - SSH User: `deploy` (hardcoded in workflow)
-- Deploy Path: `/var/www/myapp/html` (customizable in workflow)
+- Deploy Path: `/home/deploy/YOUR-REPO-NAME` (automatically detected from GitHub repository name)
 
 ## Server Setup Checklist (SSH Deployment)
 
@@ -51,9 +57,8 @@ This document provides a quick reference for all secrets, variables, and configu
 - [ ] Generate SSH key pair
 - [ ] Add public key to `~deploy/.ssh/authorized_keys`
 - [ ] Set correct permissions on `.ssh` directory (700) and `authorized_keys` file (600)
-- [ ] Create deploy directory: `/var/www/myapp/html`
-- [ ] Set ownership: `chown -R deploy:deploy /var/www/myapp`
-- [ ] Configure sudoers to allow `deploy` user to reload nginx without password
+- [ ] Configure sudoers to allow `deploy` user to reload nginx without password (NOT a full sudoer)
+- [ ] ~~Create deploy directory~~ - **Automated!** GitHub Actions creates `/home/deploy/YOUR-REPO-NAME/` automatically
 - [ ] Install and configure nginx
 - [ ] Create nginx site configuration
 - [ ] Enable nginx site
@@ -114,8 +119,8 @@ sudo certbot renew
 # Check disk usage
 df -h
 
-# Check deploy directory
-ls -la /var/www/myapp/html
+# Check deploy directory (replace with your repo name)
+ls -la /home/deploy/YOUR-REPO-NAME
 ```
 
 ### Local Testing

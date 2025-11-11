@@ -56,12 +56,23 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
 
+      # Create deployment directory on remote server if it doesn't exist
+      - name: Create deployment directory
+        run: |
+          REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)
+          ssh -i ~/.ssh/deploy_key deploy@$SERVER_IP "mkdir -p /home/deploy/$REPO_NAME"
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
       # Copy files to remote server
       - name: Copy files via SCP
         run: |
-          scp -i ~/.ssh/deploy_key -r ./dist/* deploy@$SERVER_IP:/var/www/myapp/html/
+          REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)
+          scp -i ~/.ssh/deploy_key -r ./dist/* deploy@$SERVER_IP:/home/deploy/$REPO_NAME/
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
       # Reload nginx to serve new files
       - name: Reload nginx

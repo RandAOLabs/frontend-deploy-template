@@ -1,17 +1,34 @@
 # SSH Deployment to Physical Server
 
-This guide covers setting up automated deployment to a physical server using SSH/SCP via GitHub Actions.
+This is the **complete reference guide** for SSH deployment. For step-by-step setup, use these focused guides:
+
+## Quick Start Guides
+
+1. **[Server Setup](server-setup.md)** - One-time setup of deploy user and SSH keys
+2. **[Nginx & SSL Setup](nginx-setup.md)** - One-time setup of nginx and SSL certificates
+
+Once those are complete, just push to `master` and your app deploys automatically!
+
+---
 
 ## Overview
 
 The SSH deployment workflow will:
 1. Build your React application
-2. Copy the built files to your remote server via SCP
-3. Reload nginx to serve the new files
+2. Automatically detect your GitHub repository name
+3. **Automatically create** `/home/deploy/YOUR-REPO-NAME/` directory on your server
+4. Copy the built files to that directory via SCP
+5. Reload nginx to serve the new files
+
+**Important:** The workflow automatically uses your GitHub repository name as the deployment directory. For example, if your repository is `github.com/username/my-awesome-app`, files will be deployed to `/home/deploy/my-awesome-app/`.
+
+**No manual directory creation needed!** The workflow creates the directory automatically.
 
 ## Server Setup (One-time Configuration)
 
 ### 1. Create Deploy User
+
+> **Note:** For detailed step-by-step instructions, see [Server Setup Guide](server-setup.md)
 
 On your remote server, create a dedicated `deploy` user:
 
@@ -19,9 +36,9 @@ On your remote server, create a dedicated `deploy` user:
 # Create the deploy user
 sudo useradd -m -s /bin/bash deploy
 
-# Create the web directory
-sudo mkdir -p /var/www/myapp/html
-sudo chown -R deploy:deploy /var/www/myapp
+# NOTE: You do NOT need to manually create the project directory
+# The GitHub Actions workflow will automatically create /home/deploy/YOUR-REPO-NAME/
+# when it first deploys
 ```
 
 ### 2. Generate and Configure SSH Keys
@@ -65,34 +82,44 @@ sudo chown -R deploy:deploy /home/deploy/.ssh
 
 ### 4. Configure Sudoers for Nginx Reload
 
-The `deploy` user needs permission to reload nginx without entering a password:
+**Important:** The `deploy` user is NOT a full sudoer for security reasons. Instead, we grant permission to run ONLY the specific nginx commands needed for deployment.
 
 ```bash
-# Edit sudoers file
+# Edit sudoers file (use visudo for safety)
 sudo visudo
 
 # Add this line at the end:
 deploy ALL=(ALL) NOPASSWD: /bin/systemctl reload nginx, /bin/systemctl restart nginx
+
+# This allows the deploy user to run ONLY these two commands with sudo
+# They cannot run any other sudo commands
 ```
 
 Save and exit (Ctrl+X, then Y, then Enter in nano).
 
+**Security Note:** This targeted permission is much safer than making `deploy` a full sudoer. The user can only reload/restart nginx and nothing else.
+
 ### 5. Configure Nginx
+
+> **Note:** For detailed step-by-step instructions including SSL setup with certbot, see [Nginx & SSL Setup Guide](nginx-setup.md)
 
 Create an nginx configuration for your site:
 
 ```bash
-sudo nano /etc/nginx/sites-available/myapp
+# Replace 'YOUR-REPO-NAME' with your actual repository name
+sudo nano /etc/nginx/sites-available/YOUR-REPO-NAME
 ```
 
-Add the following configuration (adjust domain name as needed):
+Add the following configuration, **hardcoding your actual repository name and domain**:
 
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com www.yourdomain.com;
+    server_name yourdomain.com www.yourdomain.com;  # Replace with your actual domain
 
-    root /var/www/myapp/html;
+    # IMPORTANT: Replace 'YOUR-REPO-NAME' with your actual GitHub repository name
+    # This must match the directory you created in step 1
+    root /home/deploy/YOUR-REPO-NAME;
     index index.html;
 
     # Handle React Router (SPA routing)
@@ -116,8 +143,8 @@ server {
 Enable the site and test configuration:
 
 ```bash
-# Enable the site
-sudo ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/
+# Enable the site (replace 'YOUR-REPO-NAME' with your actual repository name)
+sudo ln -s /etc/nginx/sites-available/YOUR-REPO-NAME /etc/nginx/sites-enabled/
 
 # Test nginx configuration
 sudo nginx -t
@@ -202,17 +229,28 @@ If you're also using the permaweb deployment, you may already have these variabl
 
 ## Customization
 
-### Change Deploy Path
+### Automatic Repository Name Detection
 
-If you want to deploy to a different directory:
+The workflow automatically detects your GitHub repository name and uses it as the deployment directory. For example:
+- Repository: `github.com/username/my-awesome-app`
+- Deploy path: `/home/deploy/my-awesome-app`
 
-1. Update the workflow file (`.github/workflows/deploy-ssh.yml`):
+**No workflow modification needed!** Just ensure:
+1. The directory `/home/deploy/YOUR-REPO-NAME` exists on your server
+2. Your nginx configuration points to `/home/deploy/YOUR-REPO-NAME`
+
+### Change Deploy Path (Advanced)
+
+If you need to use a different path structure:
+
+1. **Update the workflow file** (`.github/workflows/deploy-ssh.yml`):
    ```yaml
-   # Change this line (around line 57)
+   # Change this section (around line 62-63)
+   REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)
    scp -i ~/.ssh/deploy_key -r ./dist/* deploy@$SERVER_IP:/your/custom/path/
    ```
 
-2. Update your nginx configuration to point to the new path:
+2. **Update your nginx configuration** to point to the new path:
    ```nginx
    root /your/custom/path;
    ```
@@ -246,12 +284,15 @@ ssh -i ~/.ssh/deploy_key deploy@YOUR_SERVER_IP
 ### Permission Issues
 
 ```bash
-# Verify deploy user owns the web directory
-ls -la /var/www/myapp
+# Verify deploy user owns the project directory (replace with your repo name)
+ls -la /home/deploy/YOUR-REPO-NAME
 # Should show: drwxr-xr-x deploy deploy
 
 # Fix if needed
-sudo chown -R deploy:deploy /var/www/myapp
+sudo chown -R deploy:deploy /home/deploy/YOUR-REPO-NAME
+
+# Verify nginx can read the files (should be world-readable)
+ls -la /home/deploy/YOUR-REPO-NAME/
 ```
 
 ### Nginx Issues

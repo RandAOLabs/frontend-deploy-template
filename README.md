@@ -40,15 +40,20 @@ Deploy your application to the permanent web using Arweave's decentralized stora
 ### 2. Traditional Server Deployment (SSH/SCP)
 Deploy your application to a physical server or VPS via SSH/SCP with automatic nginx reload.
 
-**Requirements:**
-- Server with SSH access
-- Nginx web server
-- Deploy user with proper permissions
-- GitHub secrets: `SSH_PRIVATE_KEY`, `SERVER_IP`
-- DNS configuration (manual, one-time)
-- SSL/TLS certificate setup (manual, one-time with auto-renewal)
+**One-Time Setup (choose what applies):**
+- 📋 [Server Setup](docs/server-setup.md) - Create deploy user & configure SSH keys
+- 🌐 [Nginx & SSL Setup](docs/nginx-setup.md) - Configure nginx web server & SSL certificates
 
-📖 [Full SSH Deployment Guide](docs/ssh-deployment.md)
+**GitHub Configuration:**
+- GitHub secrets: `SSH_PRIVATE_KEY`, `SERVER_IP`
+
+**What's Automated:**
+- ✅ Build process
+- ✅ Directory creation on server (`/home/deploy/YOUR-REPO-NAME/`)
+- ✅ File transfer via SCP
+- ✅ Nginx reload
+
+📖 [Complete SSH Deployment Documentation](docs/ssh-deployment.md)
 
 ### Deployment Triggers
 
