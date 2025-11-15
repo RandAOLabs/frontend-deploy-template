@@ -74,6 +74,15 @@ jobs:
           SERVER_IP: ${{ secrets.SERVER_IP }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
+      # Set correct permissions for nginx to read files
+      - name: Set file permissions
+        run: |
+          REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)
+          ssh -i ~/.ssh/deploy_key deploy@$SERVER_IP "chmod -R o+rX /home/deploy/$REPO_NAME/"
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
       # Reload nginx to serve new files
       - name: Reload nginx
         run: |
