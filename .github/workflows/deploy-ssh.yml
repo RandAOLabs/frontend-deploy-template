@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - cipherplay-site
 
 jobs:
   ssh-build-and-deploy:
