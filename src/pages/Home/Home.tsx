@@ -181,50 +181,72 @@ function Home() {
 
       {/* Products & Consulting Section - Carousel */}
       <section className="products" id="products">
-        <div className="products-full-width">
-          <div className="container-header">
+        <div className="products-wrapper">
+          <div className="container">
             <h2 className="section-title">Products & Services</h2>
             <p className="section-subtitle">Licensed technology and custom blockchain solutions</p>
           </div>
-          <div className="carousel-container">
-            <div
-              className="carousel-track"
-              style={{
-                transform: `translateX(-${currentSlide * (100 / products.length)}%)`
-              }}
+
+          <div className="carousel-wrapper">
+            <button
+              className="carousel-arrow carousel-arrow-left"
+              onClick={() => setCurrentSlide((prev) => prev === 0 ? products.length - 1 : prev - 1)}
+              aria-label="Previous product"
             >
-              {products.map((product, index) => (
-                <div className="product-card" key={index}>
-                  <div className="product-image-wrapper">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="product-image"
-                    />
+              ‹
+            </button>
+
+            <div className="carousel-viewport">
+              <div
+                className="carousel-slides"
+                style={{
+                  transform: `translateX(-${currentSlide * 100}%)`
+                }}
+              >
+                {products.map((product, index) => (
+                  <div className="product-slide" key={index}>
+                    <div className="product-card">
+                      <div className="product-image-wrapper">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="product-image"
+                        />
+                      </div>
+                      <div className="product-content">
+                        <h3 className="product-name">{product.name}</h3>
+                        <p className="product-type">{product.type}</p>
+                        <p className="product-description">{product.description}</p>
+                        {product.external ? (
+                          <a href={product.link} target="_blank" rel="noopener noreferrer" className="product-link">
+                            Visit {product.name} →
+                          </a>
+                        ) : (
+                          <a href={product.link} className="product-link">Learn More →</a>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="product-content">
-                    <h3 className="product-name">{product.name}</h3>
-                    <p className="product-type">{product.type}</p>
-                    <p className="product-description">{product.description}</p>
-                    {product.external ? (
-                      <a href={product.link} target="_blank" rel="noopener noreferrer" className="product-link">
-                        Visit {product.name} →
-                      </a>
-                    ) : (
-                      <a href={product.link} className="product-link">Learn More →</a>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
+
+            <button
+              className="carousel-arrow carousel-arrow-right"
+              onClick={() => setCurrentSlide((prev) => (prev + 1) % products.length)}
+              aria-label="Next product"
+            >
+              ›
+            </button>
           </div>
-          <div className="carousel-dots">
+
+          <div className="carousel-indicators">
             {products.map((_, index) => (
               <button
                 key={index}
-                className={`carousel-dot ${index === currentSlide ? 'active' : ''}`}
+                className={`carousel-indicator ${index === currentSlide ? 'active' : ''}`}
                 onClick={() => setCurrentSlide(index)}
-                aria-label={`Go to slide ${index + 1}`}
+                aria-label={`Go to product ${index + 1}`}
               />
             ))}
           </div>

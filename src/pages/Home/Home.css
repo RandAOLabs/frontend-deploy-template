@@ -2,6 +2,13 @@
 
 .cipherplay-home {
   width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Ensure all sections don't overflow */
+section {
+  max-width: 100vw;
   overflow-x: hidden;
 }
 
@@ -456,38 +463,43 @@
   overflow: hidden;
 }
 
-.products-full-width {
-  width: 100%;
-  max-width: 100vw;
-}
-
-.container-header {
-  max-width: 1200px;
+.products-wrapper {
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
-  margin-bottom: 4rem;
 }
 
-.carousel-container {
-  width: 100%;
-  overflow: hidden;
-  padding: 0 5%;
-}
-
-.carousel-track {
+.carousel-wrapper {
+  position: relative;
   display: flex;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  align-items: center;
   gap: 2rem;
+  margin: 4rem 0;
+}
+
+.carousel-viewport {
+  flex: 1;
+  overflow: hidden;
+}
+
+.carousel-slides {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.product-slide {
+  min-width: 100%;
+  padding: 0 1rem;
 }
 
 .product-card {
-  flex: 0 0 calc(33.333% - 1.5rem);
-  min-width: calc(33.333% - 1.5rem);
   background: rgba(14, 107, 153, 0.05);
   border: 1px solid rgba(55, 255, 222, 0.1);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .product-card:hover {
@@ -559,35 +571,63 @@
   color: var(--color-white);
 }
 
-/* Carousel Dots */
-.carousel-dots {
+/* Carousel Navigation Arrows */
+.carousel-arrow {
+  background: rgba(55, 255, 222, 0.1);
+  border: 2px solid var(--color-light-blue);
+  color: var(--color-light-blue);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 1rem;
-  margin-top: 3rem;
-  padding: 0 2rem;
+  flex-shrink: 0;
 }
 
-.carousel-dot {
-  width: 12px;
-  height: 12px;
+.carousel-arrow:hover {
+  background: var(--color-light-blue);
+  color: #0a0a0a;
+  transform: scale(1.1);
+}
+
+.carousel-arrow:active {
+  transform: scale(0.95);
+}
+
+/* Carousel Indicators */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.carousel-indicator {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: rgba(55, 255, 222, 0.2);
-  border: 2px solid rgba(55, 255, 222, 0.4);
+  border: 2px solid rgba(55, 255, 222, 0.3);
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0;
 }
 
-.carousel-dot:hover {
+.carousel-indicator:hover {
   background: rgba(55, 255, 222, 0.4);
   transform: scale(1.2);
 }
 
-.carousel-dot.active {
+.carousel-indicator.active {
   background: var(--color-light-blue);
   border-color: var(--color-light-blue);
-  box-shadow: 0 0 10px rgba(55, 255, 222, 0.6);
+  box-shadow: 0 0 8px rgba(55, 255, 222, 0.6);
+  width: 12px;
+  height: 12px;
 }
 
 /* ===== INFRASTRUCTURE SECTION ===== */
@@ -968,19 +1008,21 @@
     gap: 2.5rem;
   }
 
-  .product-card {
-    flex: 0 0 calc(50% - 1rem);
-    min-width: calc(50% - 1rem);
+  .carousel-wrapper {
+    gap: 1rem;
   }
 
-  .carousel-container {
-    padding: 0 3%;
+  .carousel-arrow {
+    width: 45px;
+    height: 45px;
+    font-size: 1.75rem;
   }
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 1.5rem;
+    padding: 0 1rem;
+    max-width: 100%;
   }
 
   .section-title {
@@ -1010,13 +1052,22 @@
     gap: 2rem;
   }
 
-  .product-card {
-    flex: 0 0 100%;
-    min-width: 100%;
+  .products-wrapper {
+    padding: 0 1rem;
   }
 
-  .carousel-container {
-    padding: 0 2%;
+  .carousel-wrapper {
+    gap: 0.5rem;
+  }
+
+  .carousel-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+  }
+
+  .product-slide {
+    padding: 0 0.5rem;
   }
 
   .product-image-wrapper {
@@ -1087,12 +1138,19 @@
     font-size: 1.5rem;
   }
 
-  .carousel-container {
-    padding: 0 1%;
+  .carousel-wrapper {
+    gap: 0.25rem;
+    margin: 2rem 0;
   }
 
-  .carousel-track {
-    gap: 1rem;
+  .carousel-arrow {
+    width: 35px;
+    height: 35px;
+    font-size: 1.25rem;
+  }
+
+  .product-slide {
+    padding: 0 0.25rem;
   }
 
   .product-image-wrapper {
@@ -1104,12 +1162,33 @@
     height: 60%;
   }
 
-  .carousel-dots {
-    gap: 0.75rem;
-    margin-top: 2rem;
+  .product-content {
+    padding: 1.25rem;
   }
 
-  .carousel-dot {
+  .product-name {
+    font-size: 1.2rem;
+  }
+
+  .product-type {
+    font-size: 0.7rem;
+  }
+
+  .product-description {
+    font-size: 0.85rem;
+  }
+
+  .carousel-indicators {
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .carousel-indicator {
+    width: 8px;
+    height: 8px;
+  }
+
+  .carousel-indicator.active {
     width: 10px;
     height: 10px;
   }
@@ -1131,11 +1210,64 @@
   }
 
   .flagship-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
+  }
+
+  .flagship-tagline {
+    font-size: 1rem;
+  }
+
+  .flagship-description {
+    font-size: 0.95rem;
+  }
+
+  .flagship-badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .feature-item {
+    padding: 1rem;
+  }
+
+  .feature-icon {
+    font-size: 1.5rem;
+  }
+
+  .feature-item h4 {
+    font-size: 1rem;
+  }
+
+  .feature-item p {
+    font-size: 0.85rem;
+  }
+
+  .contact-content {
+    gap: 2rem;
   }
 
   .contact-info h2 {
-    font-size: 2rem;
+    font-size: 1.75rem;
+  }
+
+  .contact-description {
+    font-size: 1rem;
+  }
+
+  .contact-logo {
+    width: 80px;
+  }
+
+  .contact-cta {
+    padding: 2rem 1.5rem;
+  }
+
+  .contact-cta h3 {
+    font-size: 1.5rem;
+  }
+
+  .contact-cta p {
+    font-size: 0.95rem;
   }
 
   .modal-content {
