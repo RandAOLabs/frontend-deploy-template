@@ -68,17 +68,97 @@ const products = [
   }
 ]
 
+// Partners data - easy to edit!
+const partners = [
+  {
+    name: 'Startup Virginia',
+    description: 'The region\'s only nonprofit organization serving startup founders, entrepreneurs, and innovators at any stage',
+    logo: '/images/logos/Startup-Virginia-Hero-1.svg',
+    url: 'https://startupvirginia.org/'
+  },
+  {
+    name: 'Founder Institute',
+    description: 'Global network of startup incubators, accelerators, and investors on a mission to activate and empower communities of entrepreneurs worldwide',
+    logo: '/images/logos/founders-institute.png',
+    url: 'https://fi.co/'
+  },
+  {
+    name: 'AR.IO',
+    description: 'Permaweb gateway infrastructure partner powering decentralized access to Arweave',
+    logo: '/images/logos/ARIO-Dark.png',
+    url: 'https://ar.io/'
+  },
+  {
+    name: 'AO',
+    description: 'Hyperscaling onchain compute layer built on Arweave',
+    logo: '/images/logos/ao.svg',
+    url: 'https://ao.ar.io/'
+  },
+  {
+    name: 'Arweave',
+    description: 'Permanent data storage blockchain powering the permaweb',
+    logo: '/images/logos/ar.png',
+    url: 'https://www.arweave.org/'
+  },
+  {
+    name: 'Virginia Blockchain Council',
+    description: 'Strategic partnership for crypto mining hardware setup and blockchain infrastructure consulting',
+    logo: '/images/logos/virginia-blockchain-council.png',
+    url: 'https://vablockcouncil.org/'
+  }
+]
+
 function Home() {
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null)
-  const [currentSlide, setCurrentSlide] = useState(0)
+  const [currentSlide, setCurrentSlide] = useState(products.length) // Start at first real item
+  const [isTransitioning, setIsTransitioning] = useState(true)
+
+  // Create infinite loop by tripling the products array
+  const infiniteProducts = [...products, ...products, ...products]
+
+  const handleNext = () => {
+    setIsTransitioning(true)
+    setCurrentSlide((prev) => prev + 1)
+  }
+
+  const handlePrev = () => {
+    setIsTransitioning(true)
+    setCurrentSlide((prev) => prev - 1)
+  }
+
+  const handleIndicatorClick = (index: number) => {
+    setIsTransitioning(true)
+    setCurrentSlide(index + products.length)
+  }
 
   // Auto-rotate carousel every 3 seconds
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % products.length)
+      handleNext()
     }, 3000)
     return () => clearInterval(timer)
   }, [])
+
+  // Handle seamless infinite loop
+  useEffect(() => {
+    if (!isTransitioning) return
+
+    // After transition completes, check if we need to jump to maintain infinite loop
+    const timer = setTimeout(() => {
+      // If we're in the first copy (indices 0-4), jump to the same item in middle copy
+      if (currentSlide < products.length) {
+        setIsTransitioning(false)
+        setCurrentSlide(currentSlide + products.length)
+      }
+      // If we're in the third copy (indices 10-14), jump to the same item in middle copy
+      else if (currentSlide >= products.length * 2) {
+        setIsTransitioning(false)
+        setCurrentSlide(currentSlide - products.length)
+      }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [currentSlide, isTransitioning])
 
   return (
     <div className="cipherplay-home">
@@ -190,7 +270,7 @@ function Home() {
           <div className="carousel-wrapper">
             <button
               className="carousel-arrow carousel-arrow-left"
-              onClick={() => setCurrentSlide((prev) => prev === 0 ? products.length - 1 : prev - 1)}
+              onClick={handlePrev}
               aria-label="Previous product"
             >
               ‹
@@ -200,10 +280,11 @@ function Home() {
               <div
                 className="carousel-slides"
                 style={{
-                  transform: `translateX(-${currentSlide * 100}%)`
+                  transform: `translateX(calc(-${currentSlide * 33.333}% + ${33.333}%))`,
+                  transition: isTransitioning ? 'transform 0.5s ease-in-out' : 'none'
                 }}
               >
-                {products.map((product, index) => (
+                {infiniteProducts.map((product, index) => (
                   <div className="product-slide" key={index}>
                     <div className="product-card">
                       <div className="product-image-wrapper">
@@ -233,7 +314,7 @@ function Home() {
 
             <button
               className="carousel-arrow carousel-arrow-right"
-              onClick={() => setCurrentSlide((prev) => (prev + 1) % products.length)}
+              onClick={handleNext}
               aria-label="Next product"
             >
               ›
@@ -244,8 +325,8 @@ function Home() {
             {products.map((_, index) => (
               <button
                 key={index}
-                className={`carousel-indicator ${index === currentSlide ? 'active' : ''}`}
-                onClick={() => setCurrentSlide(index)}
+                className={`carousel-indicator ${(currentSlide % products.length) === index ? 'active' : ''}`}
+                onClick={() => handleIndicatorClick(index)}
                 aria-label={`Go to product ${index + 1}`}
               />
             ))}
@@ -293,47 +374,31 @@ function Home() {
         </div>
       </section>
 
-      {/* Partners Section */}
+      {/* Partners Section - Scrolling Banner */}
       <section className="partners" id="partners">
         <div className="container">
           <h2 className="section-title">Strategic Partners</h2>
           <p className="section-subtitle">Collaborating with industry leaders to build the future</p>
-          <div className="partners-grid">
-            <div className="partner-card">
-              <img
-                src="/images/logos/ARIO-Dark.png"
-                alt="AR.IO"
-                className="partner-logo"
-              />
-              <h3>AR.IO</h3>
-              <p>Permaweb gateway infrastructure partner powering decentralized access to Arweave</p>
-            </div>
-            <div className="partner-card">
-              <img
-                src="/images/logos/virginia-blockchain-council.png"
-                alt="Virginia Blockchain Council"
-                className="partner-logo"
-              />
-              <h3>Virginia Blockchain Council</h3>
-              <p>Strategic partnership for crypto mining hardware setup and blockchain infrastructure consulting</p>
-            </div>
-            <div className="partner-card partner-card-dual">
-              <div className="dual-logo-container">
+        </div>
+        <div className="partners-scroll-wrapper">
+          <div className="partners-scroll-track">
+            {/* Triple the partners array for seamless infinite scroll */}
+            {[...partners, ...partners, ...partners].map((partner, index) => (
+              <a
+                key={index}
+                href={partner.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="partner-logo-link"
+                title={partner.description}
+              >
                 <img
-                  src="/images/logos/ao.svg"
-                  alt="AO"
-                  className="partner-logo partner-logo-dual"
+                  src={partner.logo}
+                  alt={partner.name}
+                  className="partner-logo-scroll"
                 />
-                <span className="logo-separator">+</span>
-                <img
-                  src="/images/logos/ar.png"
-                  alt="Arweave"
-                  className="partner-logo partner-logo-dual"
-                />
-              </div>
-              <h3>AO & Arweave</h3>
-              <p>Built on the hyperscaling onchain compute layer (AO) and permanent data storage blockchain (Arweave)</p>
-            </div>
+              </a>
+            ))}
           </div>
         </div>
       </section>
@@ -389,7 +454,7 @@ function Home() {
               <a href="#infrastructure">Infrastructure</a>
             </div>
             <p className="footer-copyright">
-              © 2024 CipherPlay. Building on Arweave & AO.
+              © 2024 <span className="cipherplay-brand-text">CipherPlay</span>. Building on Arweave & AO.
             </p>
           </div>
         </div>
